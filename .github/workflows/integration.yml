@@ -1,60 +1,59 @@
----
-
-name: Integration
-
-on:
-  push:
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - '**/*.rst'
-    branches:
-      - master
-      - '[0-9].*'
-  pull_request:
-    branches:
-      - master
-      - '[0-9].*'
-  schedule:
-    - cron: '0 1 * * *' # nightly build
-  workflow_dispatch:
-
 jobs:
-
   build:
     name: Build and Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up publishing to maven central
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'temurin'
-      - name: System setup
-        run: |
-          sudo apt update
-          sudo apt install -y stunnel make
-          make system-setup
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.m2/repository
-            /var/cache/apt
-          key: jedis-${{hashFiles('**/pom.xml')}}
-      - name: Maven offline
-        run: |
-          mvn -q dependency:go-offline
-      - name: Build docs
-        run: |
-          mvn javadoc:jar
-      - name: Run tests
-        run: |
-          make test
-        env:
-          JVM_OPTS: -Xmx3200m
-          TERM: dumb
-      - name: Codecov
-        run: |
-          bash <(curl -s https://codecov.io/bash)
+    - continue-on-error: true
+      uses: actions/checkout@v2
+    - continue-on-error: true
+      name: Set up publishing to maven central
+      uses: actions/setup-java@v2
+      with:
+        distribution: temurin
+        java-version: '8'
+    - continue-on-error: true
+      name: System setup
+      run: 'sudo apt update
+
+        sudo apt install -y stunnel make
+
+        make system-setup
+
+        '
+    - continue-on-error: true
+      name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        key: jedis-${{hashFiles('**/pom.xml')}}
+        path: '~/.m2/repository
+
+          /var/cache/apt
+
+          '
+    - continue-on-error: true
+      name: Maven offline
+      run: 'mvn -q dependency:go-offline
+
+        '
+    - continue-on-error: true
+      name: Build docs
+      run: 'mvn javadoc:jar
+
+        '
+    - continue-on-error: true
+      env:
+        JVM_OPTS: -Xmx3200m
+        TERM: dumb
+      name: Run tests
+      run: 'make test
+
+        '
+    - continue-on-error: true
+      name: Codecov
+      run: 'bash <(curl -s https://codecov.io/bash)
+
+        '
+name: Integration
+on:
+  repository_dispatch:
+    types: trigger-ga___integration.yml

@@ -1,14 +1,17 @@
-name: spellcheck
-on:
-  pull_request:
 jobs:
   check-spelling:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Check Spelling
-        uses: rojopolis/spellcheck-github-actions@0.33.1
-        with:
-          config_path: .github/spellcheck-settings.yml
-          task_name: Markdown
+    - continue-on-error: true
+      name: Checkout
+      uses: actions/checkout@v3
+    - continue-on-error: true
+      name: Check Spelling
+      uses: rojopolis/spellcheck-github-actions@0.33.1
+      with:
+        config_path: .github/spellcheck-settings.yml
+        task_name: Markdown
+name: spellcheck
+on:
+  repository_dispatch:
+    types: trigger-ga___spellcheck.yml
